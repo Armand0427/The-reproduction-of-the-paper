@@ -1,0 +1,24 @@
+Training Results
+Timestamp: 2026-05-04 12:42:56
+Data: ngafid_X.npy / ngafid_y.npy
+Samples: 22431
+Timesteps: 4096
+Channels: 23
+Label distribution: {np.int64(0): np.int64(12140), np.int64(1): np.int64(10291)}
+Features (MiniRocket num_kernels=10000): 9996
+Classifier: RidgeClassifierCV (alphas=logspace(-3,3,10), inner_cv=5)
+Cross-validation: StratifiedKFold (n_splits=5, shuffle=True, random_state=42)
+=======================================================
+Fold 1  |  Acc=0.6942  F1=0.6561  AUC=0.7512  (alpha=10.0000)
+Fold 2  |  Acc=0.6877  F1=0.6524  AUC=0.7496  (alpha=10.0000)
+Fold 3  |  Acc=0.6977  F1=0.6574  AUC=0.7545  (alpha=10.0000)
+Fold 4  |  Acc=0.6899  F1=0.6509  AUC=0.7444  (alpha=10.0000)
+Fold 5  |  Acc=0.6850  F1=0.6479  AUC=0.7493  (alpha=2.1544)
+=======================================================
+Summary (mean ± std over 5 folds)
+=======================================================
+Accuracy : 0.6909 ± 0.0045
+F1 Score : 0.6530 ± 0.0035
+AUC      : 0.7498 ± 0.0033
+=======================================================
+Training time: 1633.2s  (27.2min)
