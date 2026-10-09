@@ -1,52 +1,58 @@
-# The-reproduction-of-the-paper
-# NGAFID Maintenance Event Binary Classification
+# 数据说明
 
-复现论文《A Large-Scale Annotated Multivariate Time Series Aviation Maintenance Dataset from the NGAFID》中的维护事件二分类实验。
+## 数据来源
 
-> 这是一次本科阶段的入门尝试，结果与论文有差异，过程记录在 [AI协作日志](docs/ai_collaboration_log.md)。
+本实验使用的数据集来自论文：
 
-## 任务
+> Yang, H., & Desell, T. (2022). A Large-Scale Annotated Multivariate Time Series 
+> Aviation Maintenance Dataset from the NGAFID. arXiv:2210.07317.
 
-判断一个航班是维修前（标签0）还是维修后（标签1）。
+**论文链接**：https://arxiv.org/abs/2210.07317
 
-- 输入：23个传感器 × 4096时间步的多变量时间序列
-- 输出：0（维修前）或 1（维修后）
+**数据集下载**：
+- Zenodo: https://doi.org/10.5281/zenodo.6624956
+- Kaggle: https://www.kaggle.com/datasets/hooong/aviation-maintenance-dataset-from-the-ngafid
 
-## 数据
+## 数据内容
 
-- 来源：[NGAFID Dataset](https://doi.org/10.5281/zenodo.6624956)
-- 样本数：22,431个航班（维修前12,140，维修后10,291）
-- 预处理：截断/填充到4096时间步，NaN前向+后向填充，不缩放
+下载后包含：
+all_flights/
+├── flight_header.csv # 航班元数据（before/after/same、日期差、维修类型）
+└── one_parq/ # 每个航班的传感器数据
+├── 1.parquet
+├── 2.parquet
+└── ...
+- **航班数**：28,935个
+- **传感器**：23个，每秒记录一次
+- **时间步长**：原始长度不一，处理后统一到4096
 
-## 方法
+## 数据预处理
 
-- 特征提取：MiniRocketMultivariate (num_kernels=10000)
-- 分类器：RidgeClassifierCV (alphas=logspace(-3,3,10))
-- 验证：5折分层交叉验证 (StratifiedKFold, random_state=42)
+按照论文方法处理（详见 `src/ngafid_loader.py`）：
 
-## 结果
+1. 排除 `before_after == 'same'` 的航班（维修当天）
+2. `before` 标为 0，`after` 标为 1
+3. 截断/填充到4096时间步（取最后4096秒）
+4. NaN用前向填充 + 后向填充 + 0填充
+5. 不缩放（MiniRocket不需要）
 
-| 指标 | 均值 ± 标准差 |
-|------|---------------|
-| Accuracy | 0.6909 ± 0.0045 |
-| F1 Score | 0.6530 ± 0.0035 |
-| AUC | 0.7498 ± 0.0033 |
+处理后得到：
+- `ngafid_X.npy`：形状 (22431, 4096, 23)
+- `ngafid_y.npy`：形状 (22431,)
 
-详细结果见 [results/](results/)。
+## 为什么仓库里没有数据文件
 
-> 注：论文Table 2中MiniRocket准确率为59.8%，本实验使用了更多数据（全部维修前后航班而非论文子集），因此结果不可直接对比。
+- `ngafid_X.npy` 约8.5GB，超出GitHub限制
+- `all_flights/` 原始数据约4.3GB，是公开数据集，可自行下载
 
-## 如何运行
+## 如何获取数据并复现
 
 ```bash
-# 1. 安装依赖
-pip install -r requirements.txt
+# 1. 下载数据集到 all_flights/
+# 从上面任一链接下载，解压到项目根目录的 all_flights/
 
-# 2. 准备数据
-# 下载NGAFID数据集到 all_flights/ 目录
-
-# 3. 生成npy文件
+# 2. 生成npy文件
 python src/ngafid_loader.py --save
 
-# 4. 训练
+# 3. 训练
 python src/train.py
